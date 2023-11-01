@@ -10,26 +10,37 @@ import { ProductService } from 'src/app/services/product.service';
   templateUrl: './product-list-grid.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit{
+export class ProductListComponent implements OnInit {
 
-  products : Product[] = [];
-  currentCategoryId : number = 1;
-  currentCategoryName : string = 'Books';
+  products: Product[] = [];
+  currentCategoryId: number = 1;
+  currentCategoryName: string = 'Books';
+  searchMode: boolean = false;
 
-  constructor(private productService : ProductService, private route : ActivatedRoute) {}
+  constructor(private productService: ProductService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-      this.route.paramMap.subscribe(() => {
-        this.listProducts();
-      })
+    this.route.paramMap.subscribe(() => {
+      this.listProducts();
+    })
   }
-  
+
   listProducts() {
 
+    this.searchMode = this.route.snapshot.paramMap.has('keyword');
+    if (this.searchMode)
+      this.handleSearchProducts();
+
+    else 
+      this.handleListProducts();
+  }
+
+  handleListProducts() {
+
     // check if id param is available
-    const hasCategoryId : boolean = this.route.snapshot.paramMap.has('id');
-    
-    if ( hasCategoryId ) {
+    const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
+
+    if (hasCategoryId) {
 
       this.currentCategoryId = +this.route.snapshot.paramMap.get('id')!;
       this.currentCategoryName = this.route.snapshot.paramMap.get('name')!;
@@ -40,11 +51,17 @@ export class ProductListComponent implements OnInit{
       this.currentCategoryId = 1;
       this.currentCategoryName = 'Books';
     }
-      
+
     this.productService.getProductList(this.currentCategoryId).subscribe(
-      data => {
-        this.products = data;
-      }
+      data => this.products = data
     )
+  }
+
+  handleSearchProducts() {
+
+    const theKeyword = this.route.snapshot.paramMap.get('keyword')!;
+    this.productService.searchProducts(theKeyword).subscribe(
+      data => this.products = data
+    );
   }
 }

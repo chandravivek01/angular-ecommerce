@@ -13,6 +13,11 @@
                         <a href="" class="primary-btn">Add to cart</a>
                     </div>
                 </div>
+
+                <!-- if searched-product does not exist then display not found -->
+                <div *ngIf="products?.length == 0" class="alert alert-warning col-md-12" role="alert">
+                    No products found
+                </div>
             </div>
         </div>
     </div>
