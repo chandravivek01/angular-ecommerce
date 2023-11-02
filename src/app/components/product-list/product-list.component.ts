@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { CartItem } from 'src/app/common/cart-item';
 import { Product } from 'src/app/common/product';
+import { CartService } from 'src/app/services/cart.service';
 import { ProductService } from 'src/app/services/product.service';
 
 @Component({
@@ -21,13 +23,15 @@ export class ProductListComponent implements OnInit {
   searchMode: boolean = false;
 
   // properties for pagination
-  thePageNumber : number = 1;
-  thePageSize : number = 5;
-  theTotalElements : number = 0;
+  thePageNumber: number = 1;
+  thePageSize: number = 5;
+  theTotalElements: number = 0;
 
-  previousKeyword : string = "";
+  previousKeyword: string = "";
 
-  constructor(private productService: ProductService, private route: ActivatedRoute) { }
+  constructor(private productService: ProductService,
+    private route: ActivatedRoute,
+    private cartService: CartService) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(() => {
@@ -35,7 +39,14 @@ export class ProductListComponent implements OnInit {
     })
   }
 
-  updatePageSize(pageSize : string ) {
+  addToCart(theProduct: Product) {
+
+    const theCartItem = new CartItem(theProduct);
+
+    this.cartService.addToCart(theCartItem);
+  }
+
+  updatePageSize(pageSize: string) {
 
     this.thePageSize = +pageSize;
     this.thePageNumber = 1;
@@ -48,7 +59,7 @@ export class ProductListComponent implements OnInit {
     if (this.searchMode)
       this.handleSearchProducts();
 
-    else 
+    else
       this.handleListProducts();
   }
 
@@ -69,16 +80,16 @@ export class ProductListComponent implements OnInit {
       this.currentCategoryName = 'Books';
     }
 
-    if ( this.previousCategoryId != this.currentCategoryId )
+    if (this.previousCategoryId != this.currentCategoryId)
       this.thePageNumber = 1;
-    
+
     this.previousCategoryId = this.currentCategoryId;
 
     // this.productService.getProductList(this.currentCategoryId).subscribe(
     //   data => this.products = data
     // )
 
-    this.productService.getProductListPaginate(this.thePageNumber-1, this.thePageSize, this.currentCategoryId).subscribe(
+    this.productService.getProductListPaginate(this.thePageNumber - 1, this.thePageSize, this.currentCategoryId).subscribe(
       data => {
         this.thePageNumber = data.page.number + 1;
         this.thePageSize = data.page.size;
@@ -93,7 +104,7 @@ export class ProductListComponent implements OnInit {
 
     const theKeyword = this.route.snapshot.paramMap.get('keyword')!;
 
-    if ( this.previousKeyword != theKeyword)
+    if (this.previousKeyword != theKeyword)
       this.thePageNumber = 1;
 
     this.previousKeyword = theKeyword;
@@ -102,7 +113,7 @@ export class ProductListComponent implements OnInit {
     //   data => this.products = data
     // );
 
-    this.productService.searchProductsPaginate(this.thePageNumber-1, this.thePageSize, theKeyword).subscribe(
+    this.productService.searchProductsPaginate(this.thePageNumber - 1, this.thePageSize, theKeyword).subscribe(
       data => {
         this.thePageNumber = data.page.number + 1;
         this.thePageSize = data.page.size;
