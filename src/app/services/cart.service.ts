@@ -14,6 +14,24 @@ export class CartService {
 
   constructor() { }
 
+  decrementQuantity(item: CartItem) {
+    
+    item.quantity--;
+    if ( item.quantity === 0 )
+     this.remove(item);
+    else
+      this.computeCartTotal();
+  }
+
+  remove(item: CartItem) {
+    
+    const itemIndex = this.cartItems.findIndex(tempItem => tempItem.id === item.id);
+    if ( itemIndex > -1 )
+      this.cartItems.splice(itemIndex, 1);
+
+    this.computeCartTotal();
+  }
+
   addToCart(theCartItem: CartItem) {
 
     // check if the item already exists in the cart
@@ -47,4 +65,5 @@ export class CartService {
     this.totalPrice.next(totalPriceValue);
     this.totalQuantity.next(totalQuantityValue);
   }
-}
+} 
+
